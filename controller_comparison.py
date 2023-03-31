@@ -6,8 +6,6 @@ from utils import *
 import numpy as np
 
 
-way_points = []
-
 W, H = 700, 700
 draw = Draw(W, H, window_name = "Canvas")
 
@@ -18,9 +16,40 @@ controller_pid = PID(kp_linear = 0.5, kd_linear = 0.1, ki_linear = 0,
 horizon = 5
 controller_mpc = MPC(horizon = horizon)
 
-for x in range(200, 600, 2):
+#
+# Newly Added
+#
+
+# Construct Referecen Trajectory
+initial_x = 200
+final_x = 600
+increment = 2
+
+state_dimension = 3    # x, y and theta
+data_size = int((final_x - initial_x)/increment)
+
+
+way_points = np.zeros((state_dimension, data_size))
+
+way_points = []
+
+
+# 3D point
+for i in range(0, data_size):
+	x = initial_x + increment * i
 	y = H/2 + 200*np.sin(2*np.pi*0.25*(x + 200)/100)
 	way_points.append([x, int(y)])
+
+
+"""
+for x in range(initial_x, final_x, increment):
+	
+	y = H/2 + 200*np.sin(2*np.pi*0.25*(x + 200)/100)
+	way_points.append([x, int(y)])
+"""
+
+
+
 
 lw = 0
 rw = 0
@@ -52,6 +81,8 @@ while True:
 	
 
 	k = draw.show()
+
+	# print(car_mpc.x_dot[2, 0])
 
 	# MPC Car
 	x, _ = car_mpc.get_state()

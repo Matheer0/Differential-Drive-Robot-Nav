@@ -33,20 +33,50 @@ class Car:
 		self.get_transformed_pts()
 
 
-	def set_wheel_velocity(self, lw_speed, rw_speed):
-		self.wheel_speed = np.array([
-										[rw_speed],
-										[lw_speed]
-									])
-		self.x_dot = self.forward_kinematics()
+	# Computes wheel velocities with linear and angular velocities
+	def inverse_kinematics(self):
+		ikine_mat = np.array([
+							[1/self.r, 0, self.b/self.r],
+							[1/self.r, 0, -self.b/self.r]
+							])
 
+		return ikine_mat@self.x_dot
+	
+
+	# Step 1 (after MPC): Update Robot Volocity
 	def set_robot_velocity(self, linear_velocity, angular_velocity):
 		self.x_dot = np.array([
 										[linear_velocity],
 										[0],
 										[angular_velocity]
 									])
-		self.wheel_speed = self.inverse_kinematics()
+		# # self.wheel_speed = self.inverse_kinematics()
+
+
+
+
+
+
+	# Step 2 (after MPC): Move Robot
+	def update(self, dt):
+		# # self.wheel_speed[self.wheel_speed>2] = 2;
+		# # self.wheel_speed[self.wheel_speed<-2] = -2;
+
+		# recompute linear and angular velocities using adjusted wheel speeds
+		# # self.x_dot = self.forward_kinematics() 
+		
+		self.update_state(dt)
+		# self.wheel_speed = self.inverse_kinematics()
+
+
+	def forward_kinematics(self):
+		kine_mat = np.array([
+							[self.r/2  		  , self.r/2],
+							[0 		 		  ,	0],
+							[self.r/(2*self.b), -self.r/(2*self.b)]
+							])
+
+		return kine_mat@self.wheel_speed
 
 
 	def update_state(self, dt):
@@ -65,36 +95,31 @@ class Car:
 							[self.x_dot[0, 0]],
 							[self.x_dot[2, 0]]
 						])
+		
+		C = np.array([
+						[dt, 0, 0],
+						[0, dt, 0],
+						[0, 0, dt]
+					])
+
 		self.x = A@self.x + B@vel
+		##self.x = A@self.x + C@self.x_dot
+
+	
 
 
-	def update(self, dt):
-		self.wheel_speed[self.wheel_speed>2] = 2;
-		self.wheel_speed[self.wheel_speed<-2] = -2;
-		self.x_dot = self.forward_kinematics()
-		self.update_state(dt)
-		self.wheel_speed = self.inverse_kinematics()
+
+	
+
+
+
+
+
+
 
 
 	def get_state(self):
 		return self.x, self.x_dot
-
-	def forward_kinematics(self):
-		kine_mat = np.array([
-							[self.r/2  		  , self.r/2],
-							[0 		 		  ,	0],
-							[self.r/(2*self.b), -self.r/(2*self.b)]
-							])
-
-		return kine_mat@self.wheel_speed
-
-	def inverse_kinematics(self):
-		ikine_mat = np.array([
-							[1/self.r, 0, self.b/self.r],
-							[1/self.r, 0, -self.b/self.r]
-							])
-
-		return ikine_mat@self.x_dot
 
 	def get_transformed_pts(self):
 		rot_mat = np.array([
@@ -107,9 +132,20 @@ class Car:
 
 		self.car_points = self.car_points.astype("int")    # 5*3 matrix
 
-		# print(self.car_points)
-		# print("-----------")
-
 	def get_points(self):
 		self.get_transformed_pts()
 		return self.car_points
+	
+
+
+
+
+
+	# Unused Function
+	def set_wheel_velocity(self, lw_speed, rw_speed):
+		print("---------------------")
+		self.wheel_speed = np.array([
+										[rw_speed],
+										[lw_speed]
+									])
+		self.x_dot = self.forward_kinematics()
