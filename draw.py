@@ -28,6 +28,22 @@ class Draw:
 						(points[-1][0], points[-1][1]), 
 						color, thickness)
 
+	# draw reference trajectory
+	def draw_reference(self, points, color = (255, 0, 0), thickness = 2, dotted = False):
+		for i in range(len(points[1]) - 1):
+			if dotted:
+				if i%2 == 0:
+					cv2.circle(self.canvas, (points[0, i], points[1, i]), 2, color, thickness)
+			else:
+				cv2.line(self.canvas, 
+							(points[0, i], points[1, i]), 
+							(points[0, i+1], points[1, i+1]), 
+							color, thickness)
+				cv2.circle(self.canvas, (points[0, i], points[1, i]), 3, (0, 0, 0), 1)
+		if not dotted:
+			cv2.circle(self.canvas, (points[0, -1], points[1, -1]), 3, (0, 0, 0), 1)
+
+
 	def draw_path(self, points, color = (255, 0, 0), thickness = 2, dotted = False):
 		for i in range(len(points)-1):
 			if dotted:
@@ -41,6 +57,8 @@ class Draw:
 				cv2.circle(self.canvas, (points[i][0], points[i][1]), 3, (0, 0, 0), 1)
 		if not dotted:
 			cv2.circle(self.canvas, (points[-1][0], points[-1][1]), 3, (0, 0, 0), 1)
+
+
 
 	def add_text(self, text, color = (255, 0, 0), thickness = 2, fontScale = 1, org = (100, 50)):
 		font = cv2.FONT_HERSHEY_SIMPLEX

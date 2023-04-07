@@ -90,6 +90,7 @@ class Car:
 						[np.cos(self.x[2, 0] + np.pi/2)*dt,  0],
 						[0					 , dt]
 					])
+		
 
 		vel = np.array([
 							[self.x_dot[0, 0]],
